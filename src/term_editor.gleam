@@ -1,26 +1,25 @@
-import gleam/int
 import gleam/io
 import gleam/result
-import shellout
+import gleam/otp/actor
+import gleam/erlang/process
+import argv
+
+import terminal
+
+pub type CursorDirection {
+	UP
+	DOWN
+	LEFT
+	RIGHT
+}
+
+pub type Key {
+  Letter(char: String)
+  CursorMovement(dir: CursorDirection)	
+}
 
 @external(erlang, "io", "get_chars")
 pub fn get_chars(prompt: String, count: int) -> String
-
-fn clear() {
-  io.print("\u{1b}[2J")
-}
-
-fn raw_mode_enter() {
-  shellout.command("stty", ["raw", "-echo"], ".", [])
-}
-
-fn raw_mode_end() {
-  shellout.command("stty", ["-raw", "echo"], ".", [])
-}
-
-fn move_cursor(row: Int, col: Int) {
-  io.print("\u{1b}[" <> int.to_string(row) <> ";" <> int.to_string(col) <> "H")
-}
 
 fn input_loop() {
   let k = get_chars("", 1)
@@ -30,10 +29,23 @@ fn input_loop() {
   }
 }
 
-pub fn main() {
-  clear()
-  raw_mode_enter()
-  move_cursor(3, 0)
+fn start_editor(filename) {
+  terminal.clear()
+  terminal.raw_mode_enter()
+  terminal.move_cursor(3, 0)
+
   input_loop()
-  raw_mode_end()
+  terminal.raw_mode_end()	
+
+  Nil
+}
+
+pub fn main() {
+  case argv.load().arguments {
+  	[filename] -> 
+  	  start_editor(filename)
+  	_ -> 
+  	  io.println("sdfdslk")
+  }
+  
 }
