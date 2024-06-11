@@ -1,4 +1,5 @@
 import gleam/io
+import gleam/string
 import shellout
 import gleam/int
 
@@ -30,7 +31,7 @@ fn read_escape_sequence() {
 	}
 }
 
-pub fn get_key() {
+pub fn get_key() -> Key {
   case get_chars("", 1) {
     "\u{1b}" -> read_escape_sequence()
   	letter -> Letter(letter)
@@ -47,6 +48,16 @@ pub fn raw_mode_enter() {
 
 pub fn raw_mode_end() {
   shellout.command("stty", ["-raw", "echo"], ".", [])
+}
+
+pub fn get_size() {
+  let assert Ok(output) = shellout.command("stty", ["size"], ".", [])
+  let assert Ok(#(lines, cols)) = string.split_once(output, " ")
+
+  let assert Ok(lines) = int.base_parse(lines, 10)
+  let assert Ok(cols) = int.base_parse(string.trim(cols), 10)
+
+  #(lines, cols)
 }
 
 pub fn move_cursor(row: Int, col: Int) {
