@@ -1,20 +1,12 @@
 import argv
 import gleam/io
 import simplifile
-import terminal
+import part2/terminal
 import gleam/string
 import gleam/list
 
 fn input_loop() {
   case terminal.get_key() {
-    terminal.CursorMovement(terminal.UP) -> {
-      io.print("\u{1b}[1T")
-      input_loop()
-    }
-    terminal.CursorMovement(terminal.DOWN) -> {
-      io.print("\u{1b}[1S")
-      input_loop()
-    }
     terminal.Letter("q") -> Nil
     _ -> {
       input_loop()
@@ -48,8 +40,8 @@ fn start_editor(filename) {
   let contents_split_lines = split_line_max_length(contents, ncols)
 
   terminal.clear()
-  io.print(string.join(list.take(contents_split_lines, nlines), "\n"))
   terminal.move_cursor(0, 0)
+  io.print(string.join(list.take(contents_split_lines, nlines), "\n"))
 
   terminal.raw_mode_enter()
   input_loop()

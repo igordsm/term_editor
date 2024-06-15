@@ -4,7 +4,7 @@ import gleam/list
 import gleam/queue
 import gleam/string
 import simplifile
-import terminal
+import part3/terminal
 
 type TermState {
   TermState(
@@ -90,6 +90,7 @@ fn start_editor(filename) {
   let contents_split_lines = split_line_max_length(contents, ncols)
 
   terminal.clear()
+  terminal.move_cursor(0, 0)
   io.print(string.join(list.take(contents_split_lines, nlines), "\n"))
   let st =
     TermState(
@@ -97,7 +98,6 @@ fn start_editor(filename) {
       queue.from_list(list.take(contents_split_lines, nlines)),
       queue.from_list(list.drop(contents_split_lines, nlines)),
     )
-  terminal.move_cursor(0, 0)
 
   terminal.raw_mode_enter()
   input_loop(st)
