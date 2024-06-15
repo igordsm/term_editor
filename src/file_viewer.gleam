@@ -19,15 +19,14 @@ fn input_loop(state: TermState) {
     terminal.CursorMovement(terminal.UP) -> {
       case queue.pop_back(state.before) {
         Ok(#(line_show, new_before)) -> {
-          let assert 
           io.print("\u{1b}[1T")
           terminal.move_cursor(0, 0)
           io.print(line_show)
-          let assert 
+          let assert Ok(#(line_hide, new_screen)) = queue.pop_back(state.screen)
           input_loop(TermState(
             new_before,
-            queue.push_front(state.screen, line_show),
-            state.after,
+            queue.push_front(new_screen, line_show),
+            queue.push_front(state.after, line_hide),
           ))
         }
         _ -> input_loop(state)
@@ -39,13 +38,13 @@ fn input_loop(state: TermState) {
           let assert Ok(#(line_hide, new_screen)) =
             queue.pop_front(state.screen)
 
-          let #(nlines, ncols) = terminal.get_size()
+          let #(nlines, _ncols) = terminal.get_size()
           terminal.move_cursor(nlines, 0)
           io.print(line_show)
           io.print("\u{1b}[1S")
           input_loop(TermState(
             queue.push_back(state.before, line_hide),
-            queue.push_back(state.screen, line_show),
+            queue.push_back(new_screen, line_show),
             new_after,
           ))
         }
